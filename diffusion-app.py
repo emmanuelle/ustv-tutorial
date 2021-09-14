@@ -1,9 +1,7 @@
 import dash
-import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output, State
-from dash_html_components.Button import Button
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -49,6 +47,7 @@ for i in range(3):
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 app.layout = html.Div(children=[
     html.H2(children='Diffusion of a single species'),

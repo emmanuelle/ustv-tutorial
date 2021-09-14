@@ -1,0 +1,7 @@
+dash >= 2.0
+plotly
+numpy
+scipy
+pandas
+multidiff
+gunicorn
