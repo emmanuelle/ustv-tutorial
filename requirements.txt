@@ -2,6 +2,5 @@ dash >= 2.0
 plotly
 numpy
 scipy
-multidiff
 gunicorn
 pandas

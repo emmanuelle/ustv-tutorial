@@ -10,9 +10,8 @@ from plotly.subplots import make_subplots
 import numpy as np
 from math import sqrt
 from scipy import special, optimize
-import multidiff
-from multidiff import compute_diffusion_matrix, create_diffusion_profiles
-
+from synthetic import create_diffusion_profiles
+from diffusion_matrix import compute_diffusion_matrix
 # ------------ Prepare computations --------------------
 
 # Single diffusion 
