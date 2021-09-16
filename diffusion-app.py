@@ -12,6 +12,7 @@ from math import sqrt
 from scipy import special, optimize
 from synthetic import create_diffusion_profiles
 from diffusion_matrix import compute_diffusion_matrix
+from diffusion_values import diffusion_dict
 # ------------ Prepare computations --------------------
 
 # Single diffusion 
@@ -50,9 +51,12 @@ server = app.server
 
 app.layout = html.Div(children=[
     html.H2(children='Diffusion of a single species'),
+    html.P('Diffusion coefficient'),
     dcc.Slider(id='d_slider', min=0, max=20, value=10, step=1, 
                tooltip={'always_visible':True}),
+    html.P('Intensity of Gaussian noise'),
     dcc.Slider(id='noise_slider', min=0, max=0.5, step=0.05, value=0, tooltip={'always_visible':True}),
+    html.P('Number of experimental points'),
     dcc.Slider(id='num_slider', min=10, max=200, step=10, value=30, tooltip={'always_visible':True}),
     html.Div(id='estimation_result', children=[]),
     html.Button('Refresh', id='redo'),
@@ -61,7 +65,13 @@ app.layout = html.Div(children=[
         figure=fig,
     ),
     html.H2(children='Multicomponent diffusion'),
+    dcc.Dropdown(id='diffusion_system',
+        options=[{'label':'Na2O-CaO-SiO2, 1200°C', 'value':'NCS',},
+                 {'label':'B2O3-Na2O-SiO2, 1100°C', 'value':'BNS'}],
+        value='NCS'),
+    html.P('Intensity of Gaussian noise'),
     dcc.Slider(id='noise_slider_multi', min=0, max=0.1, step=0.01, value=0, tooltip={'always_visible':True}),
+    html.P('Number of experimental points'),
     dcc.Slider(id='num_slider_multi', min=10, max=200, step=10, value=30, tooltip={'always_visible':True}),
     html.Div(id='estimation_multi', children=[]),
     dcc.Graph(
@@ -95,13 +105,14 @@ def plot_diffusion_single(d_val, noise, num, redo):
     #Input(component_id='d_slider', component_property='value'),
     Input(component_id='noise_slider_multi', component_property='value'),
     Input(component_id='num_slider_multi', component_property='value'),
+    Input(component_id='diffusion_system', component_property='value'),
     #Input(component_id='redo', component_property='n_clicks'),
 )
-def plot_diffusion_multi(noise, num):
-    diags = np.array([1, 5])
-    P = np.matrix([[1, 1], [-1, 0]])
+def plot_diffusion_multi(noise, num, system):
+    diags = diffusion_dict[system]['eigvals']
+    P = diffusion_dict[system]['eigvecs']
 
-    xpoints_exp1 = np.linspace(-10, 10, 100)
+    xpoints_exp1 = np.linspace(-30, 30, num)
     exchange_vectors = np.array([[0, 1, 1],
         [1, -1, 0],
         [-1, 0, -1]])
