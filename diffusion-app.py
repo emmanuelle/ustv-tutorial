@@ -12,7 +12,7 @@ from math import sqrt
 from scipy import special, optimize
 from synthetic import create_diffusion_profiles
 from diffusion_matrix import compute_diffusion_matrix
-from diffusion_values import diffusion_dict
+from diffusion_values import diffusion_dict, initials_dict
 # ------------ Prepare computations --------------------
 
 # Single diffusion 
@@ -67,7 +67,11 @@ app.layout = html.Div(children=[
     html.H2(children='Multicomponent diffusion'),
     dcc.Dropdown(id='diffusion_system',
         options=[{'label':'Na2O-CaO-SiO2, 1200°C', 'value':'NCS',},
-                 {'label':'B2O3-Na2O-SiO2, 1100°C', 'value':'BNS'}],
+                 {'label':'B2O3-Na2O-SiO2, 800°C', 'value':'BNS-800'},
+                 {'label':'B2O3-Na2O-SiO2, 900°C', 'value':'BNS-900'},
+                 {'label':'B2O3-Na2O-SiO2, 1000°C', 'value':'BNS-1000'},
+                 {'label':'B2O3-Na2O-SiO2, 1100°C', 'value':'BNS-1100'},
+                 ],
         value='NCS'),
     html.P('Intensity of Gaussian noise'),
     dcc.Slider(id='noise_slider_multi', min=0, max=0.1, step=0.01, value=0, tooltip={'always_visible':True}),
@@ -111,8 +115,10 @@ def plot_diffusion_single(d_val, noise, num, redo):
 def plot_diffusion_multi(noise, num, system):
     diags = diffusion_dict[system]['eigvals']
     P = diffusion_dict[system]['eigvecs']
+    comp_names = [initials_dict[s] for s in system[:3]]
 
-    xpoints_exp1 = np.linspace(-30, 30, num)
+    lmax = 4 * np.sqrt(np.max(diags))
+    xpoints_exp1 = np.linspace(-lmax, lmax, num)
     exchange_vectors = np.array([[0, 1, 1],
         [1, -1, 0],
         [-1, 0, -1]])
@@ -122,8 +128,12 @@ def plot_diffusion_multi(noise, num, system):
                                     exchange_vectors,
                                     noise_level=noise)
     fig2 = make_subplots(rows=1, cols=3)
+    dict_data = {s:concentration_prof for (s, concentration_prof) in zip(comp_names, concentration_profiles)}
     for i in range(3):
-        fig_tmp = px.scatter(x=xpoints_exp1, y=list(concentration_profiles[i]))
+        fig_tmp = px.scatter(x=xpoints_exp1, y=list(concentration_profiles[i]),
+                labels={'wide_variable_0':comp_names[0],
+                        'wide_variable_1':comp_names[1],
+                        'wide_variable_2':comp_names[2]})
         fig2.add_traces(fig_tmp.data, cols=i + 1, rows=1)
     diags_init = np.array([1, 1])
     P_init = np.eye(2)
@@ -136,7 +146,20 @@ def plot_diffusion_multi(noise, num, system):
     for i in range(3):
         fig_tmp = px.line(x=xpoints_exp1, y=list(concentration_profiles_est[i]))
         fig2.add_traces(fig_tmp.data, cols=i + 1, rows=1)
-    return fig2, "bla"
+    output_msg = """
+    The estimated (fitted) eigenvalues are %.2E and %.2E.
+
+    The coefficients of the major eigenvector are (%.2f, %.2f).
+    The coefficients of the minor eigenvector are (%.2f, %.2f).
+    """ %(diags_res[1], diags_res[0], 
+          eigvecs[0][1], eigvecs[1][1],
+          eigvecs[0][0], eigvecs[1][0])
+    print(fig2)
+    fig2.update_traces(showlegend=False)
+    fig2.update_traces(showlegend=True, selector={'yaxis':'y', 'mode':'markers'})
+    for i in range(3):
+        fig2.update_traces(name=comp_names[i], selector={'name':'wide_variable_%d'%i})
+    return fig2, output_msg
 
 if __name__ == '__main__':
     app.run_server(debug=True)
