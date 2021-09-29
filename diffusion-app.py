@@ -147,13 +147,23 @@ def plot_diffusion_multi(noise, num, system):
         fig_tmp = px.line(x=xpoints_exp1, y=list(concentration_profiles_est[i]))
         fig2.add_traces(fig_tmp.data, cols=i + 1, rows=1)
     output_msg = """
+    The true eigenvalues are %.2E and %.2E.
+
+    The true coefficients of the major eigenvector are (%.2f, %.2f).
+    The true coefficients of the minor eigenvector are (%.2f, %.2f).
+    
     The estimated (fitted) eigenvalues are %.2E and %.2E.
 
-    The coefficients of the major eigenvector are (%.2f, %.2f).
-    The coefficients of the minor eigenvector are (%.2f, %.2f).
-    """ %(diags_res[1], diags_res[0], 
+    The estimated coefficients of the major eigenvector are (%.2f, %.2f).
+    The estimated coefficients of the minor eigenvector are (%.2f, %.2f).
+    """ %(
+          diags[0], diags[1], 
+          P[0, 0], P[1, 0],
+          P[0, 1], P[1, 1],
+          diags_res[1], diags_res[0], 
           eigvecs[0][1], eigvecs[1][1],
-          eigvecs[0][0], eigvecs[1][0])
+          eigvecs[0][0], eigvecs[1][0]
+          )
     print(fig2)
     fig2.update_traces(showlegend=False)
     fig2.update_traces(showlegend=True, selector={'yaxis':'y', 'mode':'markers'})
