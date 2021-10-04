@@ -2,7 +2,7 @@ import numpy as np
 
 diffusion_dict = {
         'BNS-800':{'eigvals':[0.086, 0.0026], 
-                 'eigvecs':np.matrix([[0.06, 0.77], [-0.1, 0.23]])},
+                 'eigvecs':np.matrix([[0.06, 0.77], [-1.0, 0.23]])},
         'BNS-900':{'eigvals':[0.68, 0.036], 
                  'eigvecs':np.matrix([[0.02, 0.77], [-0.98, 0.23]])},
         'BNS-1000':{'eigvals':[5.4, 0.15], 
